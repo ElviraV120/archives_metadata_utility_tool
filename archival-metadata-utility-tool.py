@@ -728,7 +728,18 @@ class IngestGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Archival Metadata Creation Utility")
-        self.root.geometry("750x950")
+        
+        # Automatically adjust window size depending on screen resolution (e.g. laptop vs desktop)
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        window_width = min(800, max(680, int(screen_width * 0.5)))
+        window_height = min(950, max(550, int(screen_height * 0.85)))
+        
+        x = max(0, (screen_width - window_width) // 2)
+        y = max(0, (screen_height - window_height) // 2)
+        
+        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.root.minsize(680, 550)
         
         # Load custom window icon/logo if available in project directory
@@ -774,8 +785,33 @@ class IngestGUI:
         self.root.after(100, self.poll_log_queue)
 
     def create_widgets(self):
-        main_frame = ttk.Frame(self.root, padding="12")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        # Canvas & Scrollbar container to ensure all elements remain fully viewable on any screen size (laptops & desktops)
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        
+        main_frame = ttk.Frame(self.canvas, padding="12")
+        
+        main_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        self.canvas_window = self.canvas.create_window((0, 0), window=main_frame, anchor="nw")
+        
+        def _on_canvas_configure(event):
+            self.canvas.itemconfig(self.canvas_window, width=event.width)
+            
+        self.canvas.bind("<Configure>", _on_canvas_configure)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        def _on_mousewheel(event):
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            
+        self.canvas.bind("<MouseWheel>", _on_mousewheel)
+        main_frame.bind("<MouseWheel>", _on_mousewheel)
+        
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Title / Banner Frame with Help Button on top right
         title_frame = ttk.Frame(main_frame)
@@ -955,6 +991,13 @@ class IngestGUI:
             command=self.save_output_log
         )
         self.btn_print_log.pack(side=tk.RIGHT)
+
+        def _bind_mousewheel(widget):
+            if not isinstance(widget, scrolledtext.ScrolledText):
+                widget.bind("<MouseWheel>", _on_mousewheel, add="+")
+                for child in widget.winfo_children():
+                    _bind_mousewheel(child)
+        _bind_mousewheel(main_frame)
 
     def open_help_guide(self):
         """
