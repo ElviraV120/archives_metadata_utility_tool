@@ -1,4 +1,4 @@
-# Quick Start Guide: Option 1
+# Quick Start Guide: Option 2
 
 This guide is for users that will be extracting the technical metadata and digital assets for the first time, where nothing has been ingested into Preservica or another comparable repository at this time.
 
@@ -19,7 +19,7 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 **Note:** If the write-blocker is not available or is not compatible with the source device, you can proceed with the workflow per the archivist's discretion, but **extreme care must be taken not to write to the source device**.
 
-4. Open the tool by navigating to the *OMCSERV* network drive and opening the *Archival Procedure* folder and double-clicking on the **archival-metadata-utility-tool.py**.
+4. Open the tool by navigating to the *OMCSERV* network drive and opening the *Digital Assets Procedure* folder and double-clicking on the **archival-metadata-utility-tool.py**.
 
  ![File Explorer Window](images/Option-1/File-Explorer.png)
  
@@ -27,26 +27,43 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 ### **Using the tool**
 
-5. Select Option 1: Extract Metadata from a Folder (No Existing Entity Ref IDs) on the window.
+5. Select Option 2: Digital Assets Ingested Without Metadata (Adding IDs Later)
 
-![Archive Metadata Utility Tool Window](images/Option-1/Select_Option-1.png)
-
+![Archive Metadata Utility Tool Window](images/Option-2/Select_Option-2.png)
 *Image: Archive Metadata Utility Tool Window*
    
-6.  - Click **Browse Folder** to select the source device. This can be a USB, SD Card, HDD, folder, CD drive, etc.
-    - Click **Browse Folder** to select the **Export to** location for both metadata files ("source-device-name_Metadata" and "DC").
+6. **Provide Paths:** Enter the folder path containing your digital files, the file path for your Preservica CSV export, and the folder path where you want to save your new exports.
 
-**Note:** *It is recommended to save the metadata files to a local computer workstation or established network drive location, **NOT** on the source device.*
+   1. Click **Browse Folder** to select the source device.
+   2. Click **Browse File** to select the csv exported from Preservica containing the **Entity Ref ID**.
+   3. Click **Browse Folder** to select the **Export to** location for both metadata files.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Select-Folder-Paths.png)
 
 *Image: Archive Metadata Utility Tool Window Selecting Paths*
-   
-7. Click the **Start Process** button. The tool will scan your specified source device to extract technical information and create a new Excel file in your export folder with the name of the source device and '*_Metadata'* attached to the name.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Start-Process_1.png)
+3. **Start Process:** Click the "Start Process" button. The tool will scan your folder, match your files with their Preservica IDs, and create a new Excel file in your export folder.
 
-*Image: Archive Metadata Utility Tool Start Process*
+4. **Add Descriptions:** When the tool pauses, open the newly created Excel file. Fill in the missing descriptive information in the "DC" tab.
+ 
+![Archive Metadata Utility Tool Window](https://github.com/ElviraV120/archival_ingest_process/blob/607536c5455b6396580d1b3fc4bc6dbbc6108246/Images/Option-1/Action-Required_Open-FIle.png)
+
+*Image: Action Required: Edit Metadata Pop-up*
+
+![Metadata Excel](https://github.com/ElviraV120/archival_ingest_process/blob/607536c5455b6396580d1b3fc4bc6dbbc6108246/Images/Option-1/Open_File%201.png)
+
+*Image: Metadata Working File Excel*
+
+*Image: Archive Metadata Utility Tool Window*
+
+5. **Resume Tool:** Save and close the Excel file, then click OK in the tool to resume.
+
+
+
+*Image: Action Required: Edit Metadata Pop-up*
+
+6. **Finalize:** The tool will check your entries for typos and missing fields, then save the final completed `DC.csv` and Excel files in your export folder.
+
+---
    
 ### **Manual Entry**
 
@@ -77,8 +94,6 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 ![Process Complete Window](images/Option-1/Process-Complete.png)
 
 *Image: Process Complete Window*
-
-**Note** If you need to review the changes or errors made to the `DC.csv` and Excel files, you can read the process log window or download a copy for your records.
 
 ![Process Complete Window](images/Option-1/Process-Output-Log.png)
 

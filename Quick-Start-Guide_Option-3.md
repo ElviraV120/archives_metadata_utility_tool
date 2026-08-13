@@ -1,4 +1,4 @@
-# Quick Start Guide: Option 1
+# Quick Start Guide: Option 3
 
 This guide is for users that will be extracting the technical metadata and digital assets for the first time, where nothing has been ingested into Preservica or another comparable repository at this time.
 
@@ -27,46 +27,43 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 ### **Using the tool**
 
-5. Select Option 1: Extract Metadata from a Folder (No Existing Entity Ref IDs) on the window.
+5. Select Option 3: Technical Metadata Existing on the window.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Select_Option-1.png)
+![Archive Metadata Utility Tool Window](images/Option-3/Select_Option-3.png)
 
 *Image: Archive Metadata Utility Tool Window*
-   
-6.  - Click **Browse Folder** to select the source device. This can be a USB, SD Card, HDD, folder, CD drive, etc.
-    - Click **Browse Folder** to select the **Export to** location for both metadata files ("source-device-name_Metadata" and "DC").
+
+6. - Click **Browse Folder** to select the source device.
+   - Click **Browse File** to select the csv exported from Preservica containing the **Entity Ref ID**.
+   - Click **Browse Folder** to select the **Export to** location for both metadata files.
 
 **Note:** *It is recommended to save the metadata files to a local computer workstation or established network drive location, **NOT** on the source device.*
 
-![Archive Metadata Utility Tool Window](images/Option-1/Select-Folder-Paths.png)
+![Archive Metadata Utility Tool Window](images/Option-3/Select-Folder-Paths.png)
 
 *Image: Archive Metadata Utility Tool Window Selecting Paths*
-   
-7. Click the **Start Process** button. The tool will scan your specified source device to extract technical information and create a new Excel file in your export folder with the name of the source device and '*_Metadata'* attached to the name.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Start-Process_1.png)
+7. Click the *Start Process* button. The tool will match your previously extracted metadata files with their Preservica IDs, and create a new Excel file in your export folder with the name of the source device and '*_Metadata'* attached to the name.
 
-*Image: Archive Metadata Utility Tool Start Process*
-   
+![Archive Metadata Utility Tool Window](images/Option-3/Start-Process.png)
+
+*Image: Archive Metadata Utility Tool Window Start Process*
+
 ### **Manual Entry**
 
 8. When the tool pauses, click the **Open File** button to open the newly created Excel file. Fill in the missing descriptive information in the "DC" tab.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Start-Process_2.png)
+![Archive Metadata Utility Tool Window](images/Option-3/Action-Required_Open-File.png)
 
 *Image: Archive Metadata Utility Tool Window*
 
-![Archive Metadata Utility Tool Window](images/Option-1/Action-Required_Open-FIle.png)
-
-*Image: Action Required: Edit Metadata Pop-up*
-
-![Metadata Excel](images/Option-1/Open_File.png)
+![Metadata Excel](images/Option-3/Metadata_Edit.png)
 
 *Image: Metadata Working File Excel*
    
 9. Save and close the Excel file, then click OK in the tool to resume.
 
-![Archive Metadata Utility Tool Window](images/Option-1/Action-Required_OK.png)
+![Archive Metadata Utility Tool Window](images/Option-3/Action-Required_OK.png)
 
 *Image: Action Required: Edit Metadata Pop-up*
    
@@ -74,32 +71,28 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 10. The tool will check your entries for typos and missing fields, then save the final completed `DC.csv` and Excel files in your export folder.
 
-![Process Complete Window](images/Option-1/Process-Complete.png)
+![Process Complete Window](images/Option-3/Process-Complete.png)
 
 *Image: Process Complete Window*
 
 **Note** If you need to review the changes or errors made to the `DC.csv` and Excel files, you can read the process log window or download a copy for your records.
 
-![Process Complete Window](images/Option-1/Process-Output-Log.png)
+![Process Complete Window](images/Option-3/Process-Output-Log.png)
 
 *Image: Process Complete Window*
 
-![Process Complete Window](images/Option-1/File-Explorer-DC.png)
+![Process Complete Window](images/Option-3/File-Explorer-DC.png)
 
 *Image: DC File Export*
 
-![Process Complete Window](images/Option-1/DC-Excel.png)
+![Process Complete Window](images/Option-3/DC-Export.png)
 
 *Image: DC File*
 
 
 ### **Ingesting into Preservica**
 
-11. Create a zip file of the assets with the `DC.csv` file inside of it for ingest into Preservica. The `DC.csv` file must be in the root directory of the zip file.
-
-**Note:** If file is over 50 GB, split it into smaller files or use OPEX to ingest into Preservica.
-
-12. Log onto Preservica and navigate to the **New Gen** website.
+11. Log onto Preservica and navigate to the **New Gen** website.
 
 ![Log onto Preservica](images/Preservica/Preservica_1.png)
 
@@ -109,10 +102,14 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 *Image: Preservica New Gen Page*
 
-13. Click **Add** on the top right corner and select **Upload a folder with metadata** to upload the zip folder containing the digital assets and `DC.csv` file to the Preservica account.
+12. Click **Add** on the top right corner and select **Upload a file** to upload the zip folder containing the digital assets and `DC.csv` file to the Preservica account.
 
 ![Upload to Preservica](images/Preservica/Preservica_3.png)
 
 *Image: Upload to folder and metadata into Preservica*
 
-14. Once uploaded, the digital assets and their descriptive metadata will be available in Preservica.
+14. Once uploaded, the digital assets will have a viewable DC metadata section in Preservica.
+
+![Preservica DC Metadata](images/Option-3/Preservica_DC-metadata.png)
+
+*Image: Preservica DC metadata*
