@@ -22,6 +22,8 @@ def sanitize_filename(name):
     Sanitizes string to be safe for filenames.
     """
     clean = re.sub(r'[\\/*?:"<>|]', '', str(name)).strip()
+    if clean.endswith('.') and not clean.startswith('.'):
+        clean = clean.rstrip('.')
     return clean if clean else "Archival"
 
 def get_dcmi_type(mime):
@@ -79,8 +81,8 @@ def extract_raw_metadata(source_folder):
         return datetime.fromtimestamp(ctime).strftime('%Y-%m-%d')
 
     for root, dirs, files in os.walk(source_folder):
-        # Exclude hidden directories in-place so os.walk does not traverse into them
-        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        # Exclude hidden directories, .AppleFileInfo folders, and macOS metadata folders in-place
+        dirs[:] = [d for d in dirs if not d.startswith('.') and 'applefileinfo' not in d.lower() and d.lower() != '__macosx']
         
         # 1. Add current folder entry
         try:
@@ -103,15 +105,16 @@ def extract_raw_metadata(source_folder):
 
         # 2. Add files in current folder
         for file in files:
-            if file.startswith('.'):
+            if file.startswith('.') or 'applefileinfo' in file.lower() or file.lower() in ('thumbs.db', '.ds_store'):
                 continue
                 
+            clean_file = file.strip()
             file_path = os.path.join(root, file)
             try:
                 stats = os.stat(file_path)
                 metadata_list.append({
                     "Top Level Folder Name": top_level_folder,
-                    "File_Name": file,
+                    "File_Name": clean_file,
                     "File Path": file_path,
                     "Size (Bytes)": stats.st_size,
                     "Creation_Date": get_creation_date(stats),
@@ -177,6 +180,8 @@ def generate_opex_xml(completed_dc_df, output_dir, ref_folder_name=""):
             val_fn = row.iloc[fn_col_idx]
             if pd.notna(val_fn):
                 row_fn = str(val_fn).strip()
+                if row_fn.endswith('.') and not row_fn.startswith('.'):
+                    row_fn = row_fn.rstrip('.')
 
         # Sidecar item OPEX XML
         item_opex = ET.Element("opex:OPEXMetadata", {
@@ -413,8 +418,8 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
 
         new_rows = []
         for _, row in raw_df.iterrows():
-            file_name = str(row.get("File_Name", "")).strip()
-            raw_format_type = str(row.get("Format_Type", "")).strip()
+            file_name = str(row.get("File_Name", "") or "").strip()
+            raw_format_type = str(row.get("Format_Type", "") or "").strip()
             
             if raw_format_type.lower() in ["folder", "[root directory]", "directory"]:
                 ext = "folder"
@@ -433,7 +438,9 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                     elif "word" in ft_lower: ext = ".doc"
                     elif "excel" in ft_lower: ext = ".xls"
                     elif "executable" in ft_lower: ext = ".exe"
-                    else: ext = "." + ft_lower.split()[0] if ft_lower else ""
+                    else:
+                        ft_clean = ft_lower.lstrip('.').split()[0] if ft_lower else ""
+                        ext = "." + ft_clean if ft_clean else ""
 
             if ext == "folder":
                 mime = "inode/directory"
@@ -459,7 +466,7 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                     iso_date = str(raw_date).strip()
 
             new_rows.append({
-                col_file: row.get("File_Name", ""),
+                col_file: file_name,
                 col_creator: row.get("Author_Creator", ""),
                 col_date: iso_date,
                 col_format: mime,
@@ -494,16 +501,52 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                 
                 def get_lookup_keys(s):
                     s_str = str(s).strip()
-                    unq = urllib.parse.unquote(s_str)
-                    base = os.path.splitext(s_str.rstrip('.'))[0]
-                    unq_base = os.path.splitext(unq.rstrip('.'))[0]
-                    return {s_str.lower(), s_str.rstrip('.').lower(), base.lower(), unq.lower(), unq.rstrip('.').lower(), unq_base.lower()}
+                    unq = urllib.parse.unquote(s_str).strip()
+                    base = os.path.splitext(s_str)[0]
+                    unq_base = os.path.splitext(unq)[0]
+                    return {s_str.lower(), base.lower(), unq.lower(), unq_base.lower()}
+
+                def is_preservica_container_or_apple_file_info(p_row, title_val=""):
+                    raw_title = str(title_val or "").strip()
+                    raw_unq_title = urllib.parse.unquote(raw_title).strip()
+                    if raw_title.endswith('.') or raw_unq_title.endswith('.'):
+                        return True
+                    title_lower = raw_title.lower()
+                    if not title_lower or "applefileinfo" in title_lower or "__macosx" in title_lower or ".appledouble" in title_lower:
+                        return True
+                    for col in p_row.index:
+                        val_str = str(p_row[col]).strip().lower() if pd.notna(p_row[col]) else ""
+                        if not val_str:
+                            continue
+                        col_lower = str(col).strip().lower()
+                        if "applefileinfo" in val_str or "__macosx" in val_str:
+                            return True
+                        if col_lower in ("type", "entity type", "object type", "format", "asset type", "structural type"):
+                            if val_str in ("container", "folder", "collection", "structural", "structuralobject", "structural object", "directory", "inode/directory"):
+                                return True
+                    return False
+
+                def is_dc_container_or_apple_file_info(dc_row):
+                    fn = str(dc_row.get(col_file, "") or "").strip()
+                    fn_unq = urllib.parse.unquote(fn).strip()
+                    if fn.endswith('.') or fn_unq.endswith('.'):
+                        return True
+                    fn_lower = fn.lower()
+                    fmt = str(dc_row.get(col_format, "") or "").strip().lower()
+                    typ = str(dc_row.get(col_type, "") or "").strip().lower()
+                    if not fn_lower or "applefileinfo" in fn_lower or "__macosx" in fn_lower or ".appledouble" in fn_lower:
+                        return True
+                    if fmt in ("folder", "inode/directory", "directory", "[root directory]") or typ in ("collection", "folder", "container", "structural"):
+                        return True
+                    return False
 
                 preservica_map = {}
                 for _, p_row in preservica_df.iterrows():
                     ref_val = p_row[entity_ref_col_in_preservica]
-                    title_val = p_row[file_col_in_preservica]
+                    title_val = str(p_row[file_col_in_preservica] or "").strip()
                     if pd.notna(ref_val) and str(ref_val).strip():
+                        if is_preservica_container_or_apple_file_info(p_row, title_val):
+                            continue
                         for k in get_lookup_keys(title_val):
                             if k not in preservica_map:
                                 preservica_map[k] = str(ref_val).strip()
@@ -513,6 +556,11 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                 for r_idx, dc_row in dc_data_df.iterrows():
                     excel_row = r_idx + 3  # Data rows in DC sheet start at row 3
                     fn = str(dc_row.get(col_file, "")).strip()
+                    
+                    if is_dc_container_or_apple_file_info(dc_row):
+                        entity_refs.append("")
+                        continue
+
                     matched_ref = ""
                     for k in get_lookup_keys(fn):
                         if k in preservica_map:
