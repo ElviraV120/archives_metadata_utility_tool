@@ -1,10 +1,10 @@
 # Beginner's Guide to the Archival Metadata Utility Tool
 
-**General Setup**
+## General Setup
 1. Ensure your digital files are connected in a read-only mode via software or hardware to protect them from being altered.
 2. Open the tool by navigating to the OMCSERV network drive and opening the Archival Procedure folder and double-clicking on the **archival-metadata-utility-tool.py**.
 
- ![File Explorer Window](images/File-Explorer.png)
+ ![File Explorer Window](images/Option-1/File-Explorer.png)
  
  *Image: Navigate to OMC local network drive to open the utility tool*
 
