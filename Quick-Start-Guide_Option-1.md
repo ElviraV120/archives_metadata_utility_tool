@@ -6,11 +6,11 @@ This guide is for users that will be extracting the technical metadata and digit
 1. Ensure the appropriate level of preservation needed for the project.
 2. Confirm computer workstation is set-up with the appropriate tool: Python (and its dependencies and packages), FTK Imager (if using a PC), and Preservica log in.
 3. Unless impossible to use with the source device, connect the write-blocker to the computer workstation in the following order:
-   1. Connect the write-blocker to the source device (USB, SD Card, HDD, folder, etc.).
+   - Connect the write-blocker to the source device (USB, SD Card, HDD, folder, etc.).
     ![Write-blocker](images/Write-Blocker/write-blocker_1.png)
-   2. Connect the computer workstation to the write-blocker.
+   - Connect the computer workstation to the write-blocker.
     ![Connect_workstation](images/Write-Blocker/write-blocker_2.png)
-   3. Turn on the write-blocker.
+   - Turn on the write-blocker.
     ![Turn_on_write-blocker](images/Write-Blocker/write-blocker_3.png)
 
 **WARNING: Follow the steps in the exact order to avoid device malfunction.**
