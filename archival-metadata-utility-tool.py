@@ -214,7 +214,7 @@ def generate_opex_xml(completed_dc_df, output_dir, ref_folder_name=""):
                 item_elem = ET.SubElement(item_oai_dc, tag_name)
                 item_elem.text = val_str
                 has_item_data = True
-            elif col_lower in ["entity ref", "entity reference id"]:
+            elif col_lower in ["entity ref", "entity reference id", "asset", "preservica_entity_ref"]:
                 elem = ET.SubElement(oai_dc, "opex:EntityRef")
                 elem.text = val_str
                 item_elem = ET.SubElement(item_oai_dc, "opex:EntityRef")
@@ -384,7 +384,12 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
         template_columns = [str(col).strip() for col in dc_headers.iloc[1].tolist()]
         
         if workflow == 1:
-            cols_to_remove = [idx for idx, c in enumerate(template_columns) if str(c).strip().lower() in ["entity ref", "entity reference id"]]
+            cols_to_remove = []
+            for idx, c in enumerate(template_columns):
+                c_str = str(c).strip().lower()
+                h0_str = str(dc_headers.iloc[0, idx]).strip().upper() if idx < dc_headers.shape[1] else ""
+                if c_str in ["entity ref", "entity reference id", "asset", "preservica_entity_ref"] or h0_str == "PRESERVICA_ENTITY_REF":
+                    cols_to_remove.append(idx)
             for idx in sorted(cols_to_remove, reverse=True):
                 template_columns.pop(idx)
                 dc_headers = dc_headers.drop(dc_headers.columns[idx], axis=1)
@@ -574,13 +579,30 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                         print(f"[WARNING in Cell {col_letter}{excel_row}] Could not match Preservica Entity Ref ID for asset '{fn}'.")
 
                 print(f"Successfully matched {matched_count} out of {len(dc_data_df)} records with Preservica Entity Ref IDs.")
-                dc_data_df["Entity Ref"] = entity_refs
                 
-                if "Entity Ref" not in template_columns:
-                    template_columns.append("Entity Ref")
-                    new_col_idx = dc_headers.shape[1]
-                    dc_headers.insert(new_col_idx, new_col_idx, ["", "Entity Ref"])
+                entity_ref_col_idx = None
+                entity_ref_col_name = None
+                for idx, col in enumerate(template_columns):
+                    c_str = str(col).strip().lower()
+                    h0_str = str(dc_headers.iloc[0, idx]).strip().upper() if idx < dc_headers.shape[1] else ""
+                    if c_str in ["entity ref", "entity reference id", "asset", "preservica_entity_ref"] or h0_str == "PRESERVICA_ENTITY_REF":
+                        entity_ref_col_idx = idx
+                        entity_ref_col_name = str(col).strip()
+                        break
+
+                if entity_ref_col_idx is not None:
+                    dc_headers.iloc[0, entity_ref_col_idx] = "PRESERVICA_ENTITY_REF"
+                    dc_headers.iloc[1, entity_ref_col_idx] = "Asset"
+                    template_columns[entity_ref_col_idx] = "Asset"
+                    entity_ref_col_name = "Asset"
+                else:
+                    entity_ref_col_name = "Asset"
+                    insert_idx = 1 if len(template_columns) > 1 else len(template_columns)
+                    template_columns.insert(insert_idx, "Asset")
+                    dc_headers.insert(insert_idx, "Entity_Ref_Header_Temp", ["PRESERVICA_ENTITY_REF", "Asset"])
                     dc_headers.columns = range(dc_headers.shape[1])
+
+                dc_data_df[entity_ref_col_name] = entity_refs
             else:
                 missing_cols = []
                 if not file_col_in_preservica:
@@ -730,7 +752,8 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
     # - Option 1 / others: do not export Entity Ref column
     entity_ref_col_idx = None
     for idx, col_name in enumerate(headers):
-        if str(col_name).strip().lower() in ["entity ref", "entity reference id"]:
+        h0_str = str(completed_dc_df.iloc[0, idx]).strip().upper() if idx < completed_dc_df.shape[1] else ""
+        if str(col_name).strip().lower() in ["entity ref", "entity reference id", "asset", "preservica_entity_ref"] or h0_str == "PRESERVICA_ENTITY_REF":
             entity_ref_col_idx = idx
             break
 
