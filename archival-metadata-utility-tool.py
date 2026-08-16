@@ -447,9 +447,8 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                         ft_clean = ft_lower.lstrip('.').split()[0] if ft_lower else ""
                         ext = "." + ft_clean if ft_clean else ""
 
-            if ext == "folder":
-                mime = "inode/directory"
-                dcmi_type = "Collection"
+            if ext == "folder" or raw_format_type.lower() in ["folder", "[root directory]", "directory"] or file_name.endswith('.'):
+                continue
             else:
                 mime = format_mapping.get(ext)
                 dcmi_type = dcmi_mapping.get(ext)
@@ -745,6 +744,51 @@ def process_metadata(source_folder=None, template_path="Metadata_Template.xlsx",
                     data_rows.loc[r_idx, data_rows.columns[date_c_idx]] = parsed_d.strftime('%Y-%m-%d')
                 else:
                     print(f"[ERROR in Cell {cell_ref}] Invalid date value '{str_val}'. Expected format: YYYY-MM-DD.")
+
+    # Filter out any rows that represent folders / directories (e.g. format 'inode/directory')
+    non_folder_rows = []
+    removed_folder_count = 0
+    
+    fmt_c_idx = None
+    type_c_idx = None
+    fn_c_idx = None
+    for idx, col_name in enumerate(headers):
+        c_lower = str(col_name).strip().lower()
+        if c_lower in ("format", "format_type"):
+            fmt_c_idx = idx
+        elif c_lower == "type":
+            type_c_idx = idx
+        elif c_lower in ("file or folder name", "file name", "file_name"):
+            fn_c_idx = idx
+
+    for r_idx in data_rows.index:
+        row = data_rows.loc[r_idx]
+        is_folder = False
+
+        if fmt_c_idx is not None and pd.notna(row.iloc[fmt_c_idx]):
+            f_val = str(row.iloc[fmt_c_idx]).strip().lower()
+            if f_val in ("inode/directory", "folder", "directory", "[root directory]"):
+                is_folder = True
+
+        if not is_folder and type_c_idx is not None and pd.notna(row.iloc[type_c_idx]):
+            t_val = str(row.iloc[type_c_idx]).strip().lower()
+            if t_val in ("collection", "folder", "container", "structural"):
+                is_folder = True
+
+        if not is_folder and fn_c_idx is not None and pd.notna(row.iloc[fn_c_idx]):
+            fn_val = str(row.iloc[fn_c_idx]).strip()
+            fn_unq = urllib.parse.unquote(fn_val).strip()
+            if fn_val.endswith('.') or fn_unq.endswith('.') or "applefileinfo" in fn_val.lower() or "__macosx" in fn_val.lower() or ".appledouble" in fn_val.lower():
+                is_folder = True
+
+        if is_folder:
+            removed_folder_count += 1
+        else:
+            non_folder_rows.append(r_idx)
+
+    if removed_folder_count > 0:
+        print(f"Removed {removed_folder_count} folder/directory record(s) (e.g. format 'inode/directory') from exported DC data.")
+        data_rows = data_rows.loc[non_folder_rows].copy()
     
     # Filter Entity Ref column for DC export based on workflow option:
     # - Option 2 or 3: export Entity Ref column
