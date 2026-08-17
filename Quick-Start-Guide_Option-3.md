@@ -102,14 +102,10 @@ workstation is set up with the appropriate tool: Python (its dependencies and pa
 
 *Image: Preservica New Gen Page*
 
-12. Click **Add** on the top right corner and select **Upload a file** to upload the zip folder containing the digital assets and `DC.csv` file to the Preservica account.
+12. Click **Add** on the top right corner and select **Bulk add metadata** to upload the `DC.csv` file to the Preservica account.
 
 ![Upload to Preservica](images/Preservica/Preservica_3.png)
 
 *Image: Upload to folder and metadata into Preservica*
 
-14. Once uploaded, the digital assets will have a viewable DC metadata section in Preservica.
-
-![Preservica DC Metadata](images/Option-3/Preservica_DC-metadata.png)
-
-*Image: Preservica DC metadata*
+13. Once uploaded, the digital assets will have a viewable DC metadata section in Preservica.
